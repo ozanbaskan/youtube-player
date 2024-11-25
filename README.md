@@ -6,6 +6,10 @@
 
 [![NPM version](https://badge.fury.io/js/%40ozanbaskan%2Fyoutube-player.svg)](https://www.npmjs.com/package/@ozanbaskan/youtube-player)
 
+```bash
+npm install --save-dev @ozanbaskan/youtube-player
+```
+
 For example:
 
 ```html
