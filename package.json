@@ -1,6 +1,6 @@
 {
   "name": "@ozanbaskan/youtube-player",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Wrapper around the youtube iframe API",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -10,6 +10,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ozanbaskan/youtube-player.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "youtube",

@@ -315,6 +315,7 @@ export class YoutubePlayer {
     this.handlers = {};
     const div = document.getElementById(this.divId);
     if (div) document.getElementById(this.divId).remove();
+    this.emit('end');
   }
 
   private silenceplay: boolean;
