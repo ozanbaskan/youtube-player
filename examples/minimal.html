@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtube Player</title>
+    <script src="../dist/index.min.js"></script>
+</head>
+<body>
+    
+    <div id="my-div"></div>
+    <div id="my-div2"></div>
+    <script>
+        const main = async () => {
+            const video1 = new YoutubePlayer({ sync: true, seekedEvent: true });
+            await video1.start("my-div", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+
+            const video2 = new YoutubePlayer({ sync: true, seekedEvent: true });
+            await video2.start("my-div2", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+
+            video1.on("sync", (data) => video2.sync(data, { silent: true }));
+            video2.on("sync", (data) => video1.sync(data, { silent: true }));
+
+            setTimeout(() => {
+                video1.internalPlayer.pauseVideo();
+            }, 3000);
+
+            setTimeout(() => {
+                video2.changeVideo('https://www.youtube.com/watch?v=2lAe1cqCOXo')
+            }, 5000);
+        }
+        main();
+    </script>
+</body>
+</html>
