@@ -4,6 +4,8 @@
 
 ### This library makes it easier for you to syncronize videos
 
+[![NPM version](https://badge.fury.io/js/%40ozanbaskan%2Fyoutube-player.svg)](https://www.npmjs.com/package/@ozanbaskan/youtube-player)
+
 For example:
 
 ```html
