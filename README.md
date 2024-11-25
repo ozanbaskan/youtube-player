@@ -57,27 +57,29 @@ await video.start("my-div", "https://www.youtube.com/watch?v=2lAe1cqCOXo");
 const peer = new Peer();
 
 peer.on("connection", (dataConnection) => {
-    dataConnection.on("data", (data) => video.sync(data, { silent: true }));
-})
+  dataConnection.on("data", (data) => video.sync(data, { silent: true }));
+});
 
 const dataConnection = peer.connect("other-client-peer-id");
 video.on("sync", (data) => dataConnection.send(data));
-
 ```
 
 It also has the seeked event which youtube API does not expose.
 It is done by polling so you have the option to disable it if you are worrying about performance.
 
 ```javascript
-    const video = new YoutubePlayer({ sync: false, seekedEvent: true });
+const video = new YoutubePlayer({ sync: false, seekedEvent: true });
 
-    video.on('seeked', (data) => {
-        console.log('Seek detected, current video time:', video.syncInfo().currentTime);
-    });
+video.on("seeked", (data) => {
+  console.log(
+    "Seek detected, current video time:",
+    video.syncInfo().currentTime
+  );
+});
 ```
 
 You can stop and remove the video from DOM using end method
 
 ```javascript
-    video.end()
+video.end();
 ```
