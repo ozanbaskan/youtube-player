@@ -1,4 +1,14 @@
-export const extractYoutubeSecondsFromUrl = (tParam: string | number) => {
+export const extractYoutubeSecondsFromUrl = (youtubeUrl: string) => {
+  const url = isYoutubeUrl(youtubeUrl);
+
+  if (!url) return null;
+
+  const params = new URLSearchParams(url.toString().split("?")[1]);
+
+  return extractYoutubeSecondsFromParam(params.get('t'));
+};
+
+export const extractYoutubeSecondsFromParam = (tParam: string | number) => {
   if (!tParam) return 0;
   if (typeof tParam === "number") return parseInt(tParam.toFixed(0));
 
@@ -19,12 +29,27 @@ export const extractYoutubeSecondsFromUrl = (tParam: string | number) => {
 };
 
 export const extractYoutubeIdFromUrl = (youtubeUrl: string) => {
+  const url = isYoutubeUrl(youtubeUrl);
+
+  if (!url) return null;
+
+  const params = new URLSearchParams(url.toString().split("?")[1]);
+  let videoId = params.get("v");
+  if (url.host === "youtu.be" && !videoId) {
+    videoId = url.pathname.replace(/\//g, "");
+  }
+  if (!videoId) throw new Error("Not a valid youtube url");
+
+  return videoId;
+};
+
+export const isYoutubeUrl = (input: string): false | URL => {
   let url: URL;
 
   try {
-    url = new URL(youtubeUrl);
+    url = new URL(input);
   } catch (_error) {
-    throw new Error("Not a valid URL");
+    return false;
   }
 
   if (
@@ -32,14 +57,8 @@ export const extractYoutubeIdFromUrl = (youtubeUrl: string) => {
       url.host
     )
   ) {
-    const params = new URLSearchParams(url.toString().split("?")[1]);
-    let videoId = params.get("v");
-    if (url.host === "youtu.be" && !videoId) {
-      videoId = url.pathname.replace(/\//g, "");
-    }
-    if (!videoId) throw new Error("Not a valid youtube url");
-
-    return videoId;
+    return url;
   }
-  throw new Error("Not a youtube URL");
+
+  return false;
 };
