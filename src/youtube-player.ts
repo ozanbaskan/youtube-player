@@ -68,7 +68,6 @@ export class YoutubePlayer {
     if (this.videoId !== videoIdOrUrl) {
       this.internalPlayer.loadVideoById(videoIdOrUrl, seconds);
       this.videoId = videoIdOrUrl;
-      this.silenceload = false;
     }
   }
 
