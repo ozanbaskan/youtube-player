@@ -18,21 +18,21 @@ For example:
 ```
 
 ```javascript
-const video = new YoutubePlayer({ sync: true, seekedEvent: true });
-await video.start("my-div", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+const player = new YoutubePlayer({ sync: true, seekedEvent: true });
+await player.start("my-div", { videoId: "YbJOTdZBX1g" });
 
-const video2 = new YoutubePlayer({ sync: true, seekedEvent: true });
-await video2.start("my-div2", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+const player2 = new YoutubePlayer({ sync: true, seekedEvent: true });
+await player2.start("my-div2", { videoId: "YbJOTdZBX1g" });
 
-video.on("sync", (data) => video2.sync(data, { silent: true }));
-video2.on("sync", (data) => video.sync(data, { silent: true }));
+player.on("sync", (data) => player2.sync(data, { silent: true }));
+player2.on("sync", (data) => player.sync(data, { silent: true }));
 ```
 
 Also exposing the underlying youtube API so you can use all of the functionalities of it.
 
 ```javascript
 setTimeout(() => {
-  video.internalPlayer.pauseVideo();
+  player.internalPlayer.pauseVideo();
 }, 3000);
 ```
 
@@ -40,7 +40,7 @@ When a video is changed, other videos will be synced as well
 
 ```javascript
 setTimeout(() => {
-  video2.changeVideo("https://www.youtube.com/watch?v=2lAe1cqCOXo");
+  player2.internalPlayer.loadVideoById({ videoId: "2lAe1cqCOXo" });
 }, 5000);
 ```
 
@@ -51,29 +51,29 @@ Here is an example using peerjs:
 ```javascript
 import Peer from "peerjs";
 
-const video = new YoutubePlayer({ sync: true, seekedEvent: true });
-await video.start("my-div", "https://www.youtube.com/watch?v=2lAe1cqCOXo");
+const player = new YoutubePlayer({ sync: true, seekedEvent: true });
+await player.start("my-div", { videoId: "2lAe1cqCOXo" });
 
 const peer = new Peer();
 
 peer.on("connection", (dataConnection) => {
-  dataConnection.on("data", (data) => video.sync(data, { silent: true }));
+  dataConnection.on("data", (data) => player.sync(data, { silent: true }));
 });
 
 const dataConnection = peer.connect("other-client-peer-id");
-video.on("sync", (data) => dataConnection.send(data));
+player.on("sync", (data) => dataConnection.send(data));
 ```
 
 It also has the seeked event which youtube API does not expose.
 It is done by polling so you have the option to disable it if you are worrying about performance.
 
 ```javascript
-const video = new YoutubePlayer({ sync: false, seekedEvent: true });
+const player = new YoutubePlayer({ sync: false, seekedEvent: true });
 
-video.on("seeked", (data) => {
+player.on("seeked", (data) => {
   console.log(
     "Seek detected, current video time:",
-    video.syncInfo().currentTime
+    player.syncInfo().currentTime
   );
 });
 ```

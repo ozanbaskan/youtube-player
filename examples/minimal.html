@@ -12,21 +12,21 @@
     <div id="my-div2"></div>
     <script>
         const main = async () => {
-            const video1 = new YoutubePlayer({ sync: true, seekedEvent: true });
-            await video1.start("my-div", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+            const player1 = new YoutubePlayer({ sync: true, seekedEvent: true });
+            await player1.start("my-div", { videoId: "YbJOTdZBX1g" });   
 
-            const video2 = new YoutubePlayer({ sync: true, seekedEvent: true });
-            await video2.start("my-div2", "https://www.youtube.com/watch?v=YbJOTdZBX1g");
+            const player2 = new YoutubePlayer({ sync: true, seekedEvent: true });
+            await player2.start("my-div2", { videoId: "YbJOTdZBX1g" });
 
-            video1.on("sync", (data) => video2.sync(data, { silent: true }));
-            video2.on("sync", (data) => video1.sync(data, { silent: true }));
+            player1.on("sync", (data) => player2.sync(data, { silent: true }));
+            player2.on("sync", (data) => player1.sync(data, { silent: true }));
 
             setTimeout(() => {
-                video1.internalPlayer.pauseVideo();
+                player1.internalPlayer.pauseVideo();
             }, 3000);
 
             setTimeout(() => {
-                video2.changeVideo('https://www.youtube.com/watch?v=2lAe1cqCOXo')
+                player2.internalPlayer.loadVideoById({ videoId: '2lAe1cqCOXo' })
             }, 5000);
         }
         main();

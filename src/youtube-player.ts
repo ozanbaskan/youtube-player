@@ -13,8 +13,9 @@ export class YoutubePlayer {
 
   internalPlayer: YT.Player;
 
-  videoId: string;
   divId: string;
+
+  started: boolean;
 
   constructor(private opts?: YoutubePlayerOptions) {
     this.opts = opts || { seekedEvent: false, sync: false };
@@ -25,7 +26,7 @@ export class YoutubePlayer {
       playerState: this.internalPlayer.getPlayerState(),
       currentTime: this.internalPlayer.getCurrentTime(),
       playbackRate: this.internalPlayer.getPlaybackRate(),
-      videoId: this.videoId,
+      videoId: this.parseVideoUrl(this.internalPlayer.getVideoUrl()).videoId,
       timestamp: new Date().getTime(),
     };
   }
@@ -50,25 +51,6 @@ export class YoutubePlayer {
     }
 
     return promise;
-  }
-
-  changeVideo(videoIdOrUrl: string, tParam?: string | number) {
-    let originalTParam = tParam;
-    if (this.isUrl(videoIdOrUrl)) {
-        ({ videoId: videoIdOrUrl, tParam } = this.parseVideoUrl(videoIdOrUrl))
-    }
-
-    if (originalTParam) {
-        tParam = originalTParam;
-    }
-
-    const seconds = this.extractYoutubeSecondFromParam(tParam);
-
-
-    if (this.videoId !== videoIdOrUrl) {
-      this.internalPlayer.loadVideoById(videoIdOrUrl, seconds);
-      this.videoId = videoIdOrUrl;
-    }
   }
 
   /**
@@ -105,31 +87,34 @@ export class YoutubePlayer {
     throw new Error("Not a youtube URL");
   }
 
-  private isUrl(url: string) {
-    try {
-      new URL(url);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   /**
    *
-   * @param {string} divId Id of the div you want to put video in
-   * @param {string} videoIdOrYoutubeUrl Id of the youtube video (v param in the youtube url)
-   * @param {string | number} tParam Time of the video you want to start (t param in the youtube url)
+   * @overload
+   * @param {string} divId
+   * @param {YT.VideoByIdSettings} videoSettings Id of the youtube video (v param in the youtube url)
    * @returns {Promise<void>}
    *
-   * @param {string} divId Id of the div you want to put video in
-   * @param {string} videoIdOrYoutubeUrl Url of the video
+   */
+
+   /**
+   * @overload
+   * @param {string} divId
+   * @param {YT.VideoByMediaContentUrlSettings} videoSettings Url of the video
    * @returns {Promise<void>}
    */
   async start(
     divId: string,
-    videoIdOrYoutubeUrl: string,
-    tParam?: string | number
+    videoSettings: YT.VideoByIdSettings & YT.VideoByMediaContentUrlSettings
   ): Promise<void> {
+    if (this.started) {
+      this.emit('error', new Error('Already started youtube player'));
+      return;
+    }
+    this.started = true;
+
+    this.divId = divId;
+    if (videoSettings.mediaContentUrl) this.parseVideoUrl(videoSettings.mediaContentUrl).videoId;
+
     await this.handleScriptTag();
     youtubeAPI = YT;
 
@@ -137,27 +122,14 @@ export class YoutubePlayer {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    this.divId = divId;
-
-    let originalTParam = tParam;
-    if (this.isUrl(videoIdOrYoutubeUrl) || tParam === undefined) {
-      ({ videoId: videoIdOrYoutubeUrl, tParam } =
-        this.parseVideoUrl(videoIdOrYoutubeUrl));
-    }
-
-    if (originalTParam) {
-      tParam = originalTParam;
-    }
-
-    const seconds = this.extractYoutubeSecondFromParam(tParam);
-
-    const onError = (_event) => {
-      this.emit("error", _event);
+    const onError = (event: YT.OnErrorEvent) => {
+      this.emit("error", new Error(`Internal player error, error state: ${event.data}`));
     };
 
     const onReady = (_event) => {
       this.emit("ready");
-      player.loadVideoById(videoIdOrYoutubeUrl, seconds);
+      if (videoSettings.mediaContentUrl) player.loadVideoByUrl(videoSettings);
+      else if (videoSettings.videoId) player.loadVideoById(videoSettings);
       if (this.opts.seekedEvent) startSeekDetection();
       if (this.opts.sync) this.startSyncListener();
     };
@@ -167,7 +139,7 @@ export class YoutubePlayer {
       player.playVideo();
     };
 
-    const onStateChange = (event) => {
+    const onStateChange = (event: YT.OnStateChangeEvent) => {
       const state = event.data;
 
       if (state === youtubeAPI.PlayerState.UNSTARTED) {
@@ -179,7 +151,7 @@ export class YoutubePlayer {
       }
     };
 
-    const onPlaybackRateChange = (_event) => {
+    const onPlaybackRateChange = (_event: YT.OnPlaybackRateChangeEvent) => {
       this.emit("ratechange");
     };
 
@@ -200,7 +172,7 @@ export class YoutubePlayer {
       checkLastTime(0, divider);
     };
 
-    const player = new youtubeAPI.Player(divId, {
+    const player: YT.Player = new youtubeAPI.Player(divId, {
       playerVars: {
         playsinline: 1,
       },
@@ -214,27 +186,6 @@ export class YoutubePlayer {
     });
 
     this.internalPlayer = player;
-    this.videoId = videoIdOrYoutubeUrl;
-  }
-
-  private extractYoutubeSecondFromParam(tParam: string | number) {
-    if (!tParam) return 0;
-    if (typeof tParam === "number") return parseInt(tParam.toFixed(0));
-
-    const regex = /(?:(\d+)m)?(?:(\d+)s)?/;
-    const match = regex.exec(tParam);
-
-    if (/^\d+$/.test(tParam)) {
-      return parseInt(tParam);
-    }
-
-    if (match) {
-      const minutes = parseInt(match[1] || "0");
-      const seconds = parseInt(match[2] || "0");
-      return minutes * 60 + seconds;
-    }
-
-    return 0;
   }
 
   /** @type {YoutubePLayerEventMap} */
@@ -326,14 +277,14 @@ export class YoutubePlayer {
    *
    * @param {YoutubePlayerInfo} playerInfo
    * @param {YoutubePlayerSyncOptions} opts
-   * @returns {void}
+   * @returns {Promise<void>}
    */
-  async sync(playerInfo: YoutubePlayerInfo, opts?: YoutubePlayerSyncOptions) {
+  async sync(playerInfo: YoutubePlayerInfo, opts?: YoutubePlayerSyncOptions): Promise<void> {
     const silence = opts?.silent || true;
 
-    if (this.videoId !== playerInfo.videoId) {
+    if (this.parseVideoUrl(this.internalPlayer.getVideoUrl()).videoId !== playerInfo.videoId) {
       if (silence) this.silenceload = true;
-      this.changeVideo(playerInfo.videoId, playerInfo.currentTime);
+      this.internalPlayer.loadVideoById(playerInfo.videoId, playerInfo.currentTime);
       await this.waitLoad();
     }
 
