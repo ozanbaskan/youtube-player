@@ -5,6 +5,7 @@ import {
   YoutubePlayerOptions,
   YoutubePlayerSyncOptions,
 } from "./types";
+import { extractYoutubeIdFromUrl } from "./utils";
 
 let youtubeAPI: any;
 
@@ -26,7 +27,7 @@ export class YoutubePlayer {
       playerState: this.internalPlayer.getPlayerState(),
       currentTime: this.internalPlayer.getCurrentTime(),
       playbackRate: this.internalPlayer.getPlaybackRate(),
-      videoId: this.parseVideoUrl(this.internalPlayer.getVideoUrl()).videoId,
+      videoId: extractYoutubeIdFromUrl(this.internalPlayer.getVideoUrl()),
       timestamp: new Date().getTime(),
     };
   }
@@ -54,40 +55,6 @@ export class YoutubePlayer {
   }
 
   /**
-   * @param {string} youtubeUrl
-   * @returns {{ videoId: string, tParam: string }}
-   */
-  private parseVideoUrl(youtubeUrl: string): {
-    videoId: string;
-    tParam: string;
-  } {
-    let url: URL;
-
-    try {
-      url = new URL(youtubeUrl);
-    } catch (_error) {
-      throw new Error("Not a valid URL");
-    }
-
-    if (
-      ["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"].includes(
-        url.host
-      )
-    ) {
-      const params = new URLSearchParams(url.toString().split("?")[1]);
-      let videoId = params.get("v");
-      const tParam = params.get("t");
-      if (url.host === "youtu.be" && !videoId) {
-        videoId = url.pathname.replace(/\//g, "");
-      }
-      if (!videoId) throw new Error("Not a valid youtube url");
-
-      return { videoId, tParam };
-    }
-    throw new Error("Not a youtube URL");
-  }
-
-  /**
    *
    * @overload
    * @param {string} divId
@@ -104,7 +71,7 @@ export class YoutubePlayer {
    */
   async start(
     divId: string,
-    videoSettings: YT.VideoByIdSettings & YT.VideoByMediaContentUrlSettings
+    videoSettings: Partial<YT.VideoByIdSettings & YT.VideoByMediaContentUrlSettings>
   ): Promise<void> {
     if (this.started) {
       this.emit('error', new Error('Already started youtube player'));
@@ -127,8 +94,8 @@ export class YoutubePlayer {
 
     const onReady = (_event) => {
       this.emit("ready");
-      if (videoSettings.mediaContentUrl) player.loadVideoByUrl(videoSettings);
-      else if (videoSettings.videoId) player.loadVideoById(videoSettings);
+      if (videoSettings.mediaContentUrl) player.loadVideoByUrl(videoSettings as any);
+      else if (videoSettings.videoId) player.loadVideoById(videoSettings as any);
       if (this.opts.seekedEvent) startSeekDetection();
       if (this.opts.sync) this.startSyncListener();
     };
@@ -281,7 +248,7 @@ export class YoutubePlayer {
   async sync(playerInfo: YoutubePlayerInfo, opts?: YoutubePlayerSyncOptions): Promise<void> {
     const silence = opts?.silent || true;
 
-    if (this.parseVideoUrl(this.internalPlayer.getVideoUrl()).videoId !== playerInfo.videoId) {
+    if (extractYoutubeIdFromUrl(this.internalPlayer.getVideoUrl()) !== playerInfo.videoId) {
       if (silence) this.silenceload = true;
       this.internalPlayer.loadVideoById(playerInfo.videoId, playerInfo.currentTime);
       await this.waitLoad();
