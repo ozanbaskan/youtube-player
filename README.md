@@ -1,8 +1,8 @@
 # Youtube Player
 
-### This is a wrapper around the youtube iframe API that allows you to put youtube videos on your webpage
+### This is a wrapper around the youtube iframe API that allows you to put youtube videos on your webpage.
 
-### This library makes it easier for you to syncronize videos
+### This library makes it easier for you to syncronize videos.
 
 [![NPM version](https://badge.fury.io/js/%40ozanbaskan%2Fyoutube-player.svg)](https://www.npmjs.com/package/@ozanbaskan/youtube-player)
 
@@ -28,6 +28,18 @@ player.on("sync", (data) => player2.sync(data, { silent: true }));
 player2.on("sync", (data) => player.sync(data, { silent: true }));
 ```
 
+You can also pass user friendly URL from youtube using utility methods:
+
+```javascript
+import { extractYoutubeSecondsFromUrl, extractYoutubeIdFromUrl } from '@ozanbaskan/youtube-player';
+
+const url = "https://www.youtube.com/watch?v=YbJOTdZBX1g&t=1m30s";
+const videoId = extractYoutubeIdFromUrl(url);
+const startSeconds = extractYoutubeSecondsFromUrl(url);
+
+await player.start("my-div", { videoId, startSeconds })
+```
+
 Also exposing the underlying youtube API so you can use all of the functionalities of it.
 
 ```javascript
@@ -36,7 +48,7 @@ setTimeout(() => {
 }, 3000);
 ```
 
-When a video is changed, other videos will be synced as well
+When a video is changed, other videos will be synced as well.
 
 ```javascript
 setTimeout(() => {
@@ -44,7 +56,7 @@ setTimeout(() => {
 }, 5000);
 ```
 
-You can create a peer to peer connection betweeen clients and sync videos using the connection
+You can create a peer to peer connection betweeen clients and sync videos using the connection.
 
 Here is an example using peerjs:
 
@@ -78,7 +90,7 @@ player.on("seeked", (data) => {
 });
 ```
 
-You can stop and remove the video from DOM using end method
+You can stop and remove the video from DOM using end method.
 
 ```javascript
 player.end();

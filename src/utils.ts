@@ -1,4 +1,4 @@
-export const extractYoutubeSecondsFromParam = (tParam: string | number) => {
+export const extractYoutubeSecondsFromUrl = (tParam: string | number) => {
   if (!tParam) return 0;
   if (typeof tParam === "number") return parseInt(tParam.toFixed(0));
 
