@@ -81,5 +81,5 @@ player.on("seeked", (data) => {
 You can stop and remove the video from DOM using end method
 
 ```javascript
-video.end();
+player.end();
 ```
