@@ -8,7 +8,7 @@ export default {
     output: [
         { file: 'dist/index.cjs.js', format: 'cjs' },
         { file: 'dist/index.esm.js', format: 'esm' },
-        { file: 'dist/index.min.js', format: 'umd', name: 'MyLibrary', plugins: [terser()] }
+        { file: 'dist/index.min.js', format: 'umd', name: 'YoutubePlayer', plugins: [terser()] }
     ],
     plugins: [resolve(), commonjs(), typescript()]
 };
