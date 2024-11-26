@@ -33,8 +33,12 @@ export class YoutubePlayer {
   }
 
   private async handleScriptTag() {
+    const id = 'ozanbaskan-youtube-player';
+    if (document.getElementById(id)) return;
+
     const script = document.createElement("script");
     script.src = "https://www.youtube.com/iframe_api";
+    script.id = id;
 
     const promise = new Promise((resolve) => {
       script.addEventListener("load", resolve);
@@ -82,7 +86,7 @@ export class YoutubePlayer {
     this.divId = divId;
 
     await this.handleScriptTag();
-    youtubeAPI = YT;
+    youtubeAPI = YT || youtubeAPI;
 
     while (!youtubeAPI.loaded) {
       await new Promise((resolve) => setTimeout(resolve, 100));

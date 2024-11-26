@@ -4,6 +4,8 @@
 
 ### This library makes it easier for you to syncronize videos.
 
+#### I am planing to add more features, if you have any feature requests visit https://github.com/ozanbaskan/youtube-player/issues.
+
 [![NPM version](https://badge.fury.io/js/%40ozanbaskan%2Fyoutube-player.svg)](https://www.npmjs.com/package/@ozanbaskan/youtube-player)
 
 ```bash
@@ -95,3 +97,22 @@ You can stop and remove the video from DOM using end method.
 ```javascript
 player.end();
 ```
+
+
+#### Utility Functions
+ - extractYoutubeSecondsFromUrl
+ - extractYoutubeSecondsFromParam
+ - extractYoutubeIdFromUrl
+ - isYoutubeUrl
+
+#### YoutubePlayer Events
+ - play
+ - pause
+ - seeked (if you activate it, necessary for syncing to work properly)
+ - load (when a new video is loaded to player)
+ - ratechange (when playbackRate changes)
+ - ready (when player is ready to load videos)
+ - error
+ - sync (when video is paused, played, seeked or its rate changes)
+ - end (when end method is called)
+ 
