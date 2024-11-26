@@ -113,7 +113,6 @@ export class YoutubePlayer {
     this.started = true;
 
     this.divId = divId;
-    if (videoSettings.mediaContentUrl) this.parseVideoUrl(videoSettings.mediaContentUrl).videoId;
 
     await this.handleScriptTag();
     youtubeAPI = YT;
