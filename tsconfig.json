@@ -1,9 +1,13 @@
 {
     "compilerOptions": {
-      "declaration": true,
       "module": "ESNext",
-      "target": "ESNext",
-      "outDir": "dist"
+      "target": "ES6",
+      "moduleResolution": "node",
+      "declaration": true,
+      "outDir": "dist",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "types": ["node", "youtube"]
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]
